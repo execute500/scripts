@@ -47,8 +47,6 @@ ESPLibrary:SetTracers(false)
 Loading:SetCurrentStep(1)
 Loading:SetDescription("创建页面中...")
 
-
-
 local Window = Library:CreateWindow({
 	Title = "Sprout",
 	Footer = "当前版本: " .. version,
@@ -278,8 +276,6 @@ Menu:AddButton("卸载菜单", function()
 	Library:Unload()
 end)
 
-
-
 Loading:SetCurrentStep(2)
 Loading:SetDescription("加载配置中...")
 -- SaveManager
@@ -301,8 +297,6 @@ Loading.Sidebar:AddLabel("当前版本: " .. version)
 Loading:SetDescription("加载完成!")
 task.wait(1)
 Loading:Continue()
-
-
 
 function getFileNameFromURL(url)
 	local path = url:split("?")[1]
@@ -494,8 +488,6 @@ function unfly()
 		mfly2:Disconnect()
 	end)
 end
-
-
 
 local playerAdded
 Toggles.PlayerESP:OnChanged(function(state)
@@ -794,51 +786,57 @@ end)
 
 local objAdded
 Toggles.MonsterNotify:OnChanged(function(state)
-    if state then
-        objAdded = Workspace.ChildAdded:Connect(function(obj)
-            if obj.Name == "RushMoving" then
-                Library:Notify("Rush 生成!")
-                if Toggles.MonsterChat.Value then
-                    chatMessage("Rush 生成!")
-                end
-            end
-        end)
-    else
-        objAdded:Disconnect()
-        objAdded = nil
-    end
+	if state then
+		objAdded = Workspace.ChildAdded:Connect(function(obj)
+			if obj.Name == "RushMoving" then
+				Library:Notify("Rush 生成!")
+				if Toggles.MonsterChat.Value then
+					chatMessage("Rush 生成!")
+				end
+			end
+		end)
+	else
+		objAdded:Disconnect()
+		objAdded = nil
+	end
 end)
 
 local scpRemovedSignal
 local scpNotify
 Toggles.Auto035:OnChanged(function(state)
-    if state then
-        if Workspace:FindFirstChild("SCP-035") then
-            scpNotify = Library:Notify({ Title = "警告", Description = "SCP-035存在,等待消灭SCP-035中...", Persist = true })
-        else
-            fireclickdetector(Workspace.Facility.Special["SCP-035"].ClickDetector)
-        end
-        scpRemovedSignal = Workspace.ChildRemoved:Connect(function(child)
-            if child.Name == "SCP-035" then
-                if scpNotify then scpNotify:Destroy() end
-                fireclickdetector(Workspace.Facility.Special["SCP-035"].ClickDetector)
-            end
-        end)
-    else
-        scpRemovedSignal:Disconnect()
-        scpRemovedSignal = nil
-    end
+	if state then
+		if Workspace:FindFirstChild("SCP-035") then
+			scpNotify = Library:Notify({
+				Title = "警告",
+				Description = "SCP-035存在,等待消灭SCP-035中...",
+				Persist = true,
+			})
+		else
+			fireclickdetector(Workspace.Facility.Special["SCP-035"].ClickDetector)
+		end
+		scpRemovedSignal = Workspace.ChildRemoved:Connect(function(child)
+			if child.Name == "SCP-035" then
+				if scpNotify then
+					scpNotify:Destroy()
+				end
+				fireclickdetector(Workspace.Facility.Special["SCP-035"].ClickDetector)
+			end
+		end)
+	else
+		scpRemovedSignal:Disconnect()
+		scpRemovedSignal = nil
+	end
 end)
 
 local scpchrAdded
 Toggles.AutoClothes:OnChanged(function(state)
-    if state then
-        fireclickdetector(Workspace.Facility.Special["Clothes Giver"].ClickPart.ClickDetector)
-        scpchrAdded = Players.LocalPlayer.CharacterAdded:Connect(function()
-            fireclickdetector(Workspace.Facility.Special["Clothes Giver"].ClickPart.ClickDetector)
-        end)
-    else
-        scpchrAdded:Disconnect()
-        scpchrAdded = nil
-    end
+	if state then
+		fireclickdetector(Workspace.Facility.Special["Clothes Giver"].ClickPart.ClickDetector)
+		scpchrAdded = Players.LocalPlayer.CharacterAdded:Connect(function()
+			fireclickdetector(Workspace.Facility.Special["Clothes Giver"].ClickPart.ClickDetector)
+		end)
+	else
+		scpchrAdded:Disconnect()
+		scpchrAdded = nil
+	end
 end)
