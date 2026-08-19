@@ -139,11 +139,11 @@ end
 
 -- 游戏
 local DoorsBox = Tabs.Games:AddLeftGroupbox("Doors")
-DoorsBox.GameId = 6839171747
+DoorsBox.PlaceId = 6839171747
 DoorsBox:AddToggle("MonsterNotify", { Text = "实体通知" })
 DoorsBox:AddToggle("MonsterChat", { Text = "聊天通知" })
 local BeSCPBox = Tabs.Games:AddRightGroupbox("成为SCP或守卫")
-BeSCPBox.GameId = 121461214257813
+BeSCPBox.PlaceId = 121461214257813
 BeSCPBox:AddToggle("SCPESP", { Text = "SCP ESP" })
 BeSCPBox:AddToggle("MTFESP", { Text = "MTF ESP" })
 BeSCPBox:AddToggle("GuardESP", { Text = "守卫ESP" })
@@ -160,7 +160,7 @@ BeSCPBox:AddToggle("Auto035", { Text = "自动035" })
 BeSCPBox:AddToggle("AutoClothes", { Text = "自动穿衣😀" })
 
 for _, gamebox in pairs(Tabs.Games.Groupboxes) do
-	if gamebox.GameId == game.GameId then
+	if gamebox.PlaceId ~= game.PlaceId then
 		for _, element in pairs(gamebox.Elements) do
 			if element.SetDisabled then
 				element:SetDisabled(true)
