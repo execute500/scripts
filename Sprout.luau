@@ -163,7 +163,7 @@ for _, gamebox in pairs(Tabs.Games.Groupboxes) do
 	if gamebox.GameId == game.GameId then
 		for _, element in pairs(gamebox.Elements) do
 			if element.SetDisabled then
-				element.SetDisabled(true)
+				element:SetDisabled(true)
 			end
 		end
 	end
