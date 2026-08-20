@@ -269,7 +269,7 @@ local Tabs = {
 }
 
 -- 获取公告
-local result = request(repo .. "update.json")
+local result = request({ Url = repo .. "update.json" })
 if result.Success then
   local UpdateInfo = HttpService:JSONDecode(result.Body)
   if UpdateInfo.Version ~= version then
