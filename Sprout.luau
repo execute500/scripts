@@ -119,7 +119,7 @@ function ESP(plr)
 
 	local addedFunc
 	local teamChange
-	addedFunc = Library:Givesignal(plr.CharacterAdded:Connect(function()
+	addedFunc = Library:GiveSignal(plr.CharacterAdded:Connect(function()
 		if not Toggles.PlayerESP.Value then
 			addedFunc:Disconnect()
 			return
@@ -130,7 +130,7 @@ function ESP(plr)
 			Color = color,
 		})
 	end))
-	teamChange = Library:Givesignal(plr:GetPropertyChangedSignal("TeamColor"):Connect(function()
+	teamChange = Library:GiveSignal(plr:GetPropertyChangedSignal("TeamColor"):Connect(function()
 		if not Toggles.PlayerESP.Value then
 			teamChange:Disconnect()
 			return
@@ -495,7 +495,7 @@ end)
 local playerAdded
 Toggles.PlayerESP:OnChanged(function(state)
 	if state then
-		playerAdded = Library:Givesignal(Players.PlayerAdded:Connect(function(plr)
+		playerAdded = Library:GiveSignal(Players.PlayerAdded:Connect(function(plr)
 			ESP(plr)
 		end))
 		for _, plr in Players:GetPlayers() do
