@@ -16,7 +16,7 @@ Services = setmetatable({}, {
 	end,
 })
 
-local version = "v0.1.3"
+local version = "0.1.3"
 local repo = "https://raw.githubusercontent.com/execute500/scripts/refs/heads/main/"
 local librepo = "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/"
 local Library = loadstring(game:HttpGet(librepo .. "Library.lua"))()
@@ -35,6 +35,7 @@ local ProximityPromptService = Services.ProximityPromptService
 local Lighting = Services.Lighting
 local TeleportService = Services.TeleportService
 local TextChatService = Services.TextChatService
+local HttpService = Services.HttpService
 
 function getFileNameFromURL(url)
 	local path = url:split("?")[1]
@@ -266,6 +267,29 @@ local Tabs = {
 	Vision = Window:AddTab("视觉", "eye"),
 	["UI Settings"] = Window:AddTab("UI设置", "settings"),
 }
+
+-- 获取公告
+local result = request(repo .. "update.json")
+if result.Success then
+  local UpdateInfo = HttpService:JSONDecode(result.Body)
+  if UpdateInfo.Version ~= version then
+    Library:Notify("当前版本过旧,请尽快更新!")
+  end
+  if UpdateInfo.Announcement ~= "" then
+    Tabs.Main:UpdateWarningBox({
+        Title = "公告",
+        Text = UpdateInfo.Announcement,
+        IsNormal = true
+    })
+  end
+else
+  Tabs.Main:UpdateWarningBox({
+      Title = "警告",
+      Text = "无法获取版本信息:(",
+      IsNormal = false
+  })
+  warn(string.format("[%s %s] 无法获取版本信息", tostring(result.StatusCode), result.StatusMessage))
+end
 
 -- 主要
 local MainTab = Tabs.Main:AddLeftGroupbox("主要", "sliders-horizontal")
