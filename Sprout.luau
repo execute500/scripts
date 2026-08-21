@@ -1,5 +1,3 @@
--- 本脚本考验你sUNC功夫
--- 即默认你的执行器能支持所以sUNC
 -- 参照文档: https://docs.sunc.su
 
 Services = setmetatable({}, {
@@ -16,7 +14,7 @@ Services = setmetatable({}, {
 	end,
 })
 
-local version = "0.1.3"
+local version = "0.1.4"
 local repo = "https://raw.githubusercontent.com/execute500/scripts/refs/heads/main/"
 local librepo = "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/"
 local Library = loadstring(game:HttpGet(librepo .. "Library.lua"))()
@@ -36,6 +34,7 @@ local Lighting = Services.Lighting
 local TeleportService = Services.TeleportService
 local TextChatService = Services.TextChatService
 local HttpService = Services.HttpService
+local LocalPlayer = Players.LocalPlayer
 
 function getFileNameFromURL(url)
 	local path = url:split("?")[1]
@@ -75,21 +74,21 @@ function getCustomAsset(name, url)
 end
 
 function reset()
-	local humanoid = Players.LocalPlayer.Character and Players.LocalPlayer.Character:FindFirstChildWhichIsA("Humanoid")
+	local humanoid = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildWhichIsA("Humanoid")
 	if humanoid then
 		humanoid:ChangeState(Enum.HumanoidStateType.Dead)
 	else
-		Players.LocalPlayer.Character:BreakJoints()
+		LocalPlayer.Character:BreakJoints()
 	end
 end
 
 function rejoin()
 	if #Players:GetPlayers() <= 1 then
-		Players.LocalPlayer:Kick("\n重新加入中...")
+		LocalPlayer:Kick("\n重新加入中...")
 		task.wait()
-		TeleportService:Teleport(game.PlaceId, Players.LocalPlayer)
+		TeleportService:Teleport(game.PlaceId, LocalPlayer)
 	else
-		TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, Players.LocalPlayer)
+		TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
 	end
 end
 
@@ -98,7 +97,7 @@ function chatMessage(str)
 end
 
 function ESP(plr)
-	if plr == Players.LocalPlayer then
+	if plr == LocalPlayer then
 		return
 	end
 
@@ -148,7 +147,7 @@ local gyroHandlerName = randomString()
 local mfly1
 local mfly2
 function fly()
-	local plr = Players.LocalPlayer
+	local plr = LocalPlayer
 	local root = getRoot(plr.Character)
 	local camera = workspace.CurrentCamera
 	local v3none = Vector3.new()
@@ -227,7 +226,7 @@ end
 
 function unfly()
 	pcall(function()
-		local plr = Players.LocalPlayer
+		local plr = LocalPlayer
 		local root = getRoot(plr.Character)
 		root:FindFirstChild(velocityHandlerName):Destroy()
 		root:FindFirstChild(gyroHandlerName):Destroy()
@@ -276,19 +275,19 @@ if result.Success then
 		Library:Notify("当前版本过旧,请尽快更新!\n最新版本: " .. UpdateInfo.Version)
 	end
 	if UpdateInfo.Announcement ~= "" then
-    Tabs.Main:UpdateWarningBox({
-      Title = "公告",
-      Text = UpdateInfo.Announcement,
-      IsNormal = true,
-      Visible = true,
-    })
+		Tabs.Main:UpdateWarningBox({
+			Title = "公告",
+			Text = UpdateInfo.Announcement,
+			IsNormal = true,
+			Visible = true,
+		})
 	end
 else
 	Tabs.Main:UpdateWarningBox({
 		Title = "警告",
 		Text = "无法获取版本信息:(",
 		IsNormal = false,
-    Visible = true,
+		Visible = true,
 	})
 	warn(string.format("[%s %s] 无法获取版本信息", tostring(result.StatusCode), result.StatusMessage))
 end
@@ -310,9 +309,9 @@ SessionTab:AddButton({ Text = "重新加入", DoubleClick = true, Func = rejoin 
 
 local DownloadTab = Tabs.Main:AddRightGroupbox("下载", "download")
 DownloadTab:AddInput("FileURL", { Text = "文件URL", Placeholder = "https://example.com/file.txt" })
-DownloadTab:AddButton({
-	Text = "下载",
-	Func = function()
+DownloadTab:AddButton(
+	"下载",
+	function()
 		if Options.FileURL.Value == "" then
 			return
 		end
@@ -340,8 +339,8 @@ DownloadTab:AddButton({
 			)
 		end
 		processN:Destroy()
-	end,
-})
+	end
+)
 
 local OtherScripts = Tabs.Main:AddRightGroupbox("其他脚本", "ellipsis")
 local Scripts = {
@@ -470,11 +469,44 @@ LightBox:AddToggle("FullBright", { Text = "全亮" })
 LightBox:AddToggle("Nofog", { Text = "无雾" })
 
 local SelfBox = Tabs.Vision:AddRightGroupbox("自身")
-SelfBox:AddToggle(
-	"CameraMode",
-	{ Text = "第三人称", Default = Players.LocalPlayer.CameraMode == Enum.CameraMode.Classic }
+SelfBox:AddToggle("CameraMode", { Text = "第三人称", Default = LocalPlayer.CameraMode == Enum.CameraMode.Classic })
+SelfBox:AddButton("摄像机穿墙", function()
+	local sc = (debug and debug.setconstant) or setconstant
+	local gc = (debug and debug.getconstants) or getconstants
+	local pop = LocalPlayer.PlayerScripts.PlayerModule.CameraModule.ZoomController.Popper
+	for _, v in pairs(getgc()) do
+		if type(v) == 'function' and getfenv(v).script == pop then
+			for i, v1 in pairs(gc(v)) do
+				if tonumber(v1) == .25 then
+					sc(v, i, 0)
+				elseif tonumber(v1) == 0 then
+					sc(v, i, .25)
+				end
+			end
+		end
+	end
+  Library:Notify("设置成功!", 2)
+end)
+SelfBox:AddDivider()
+SelfBox:AddSlider(
+	"Fov",
+	{
+		Text = "视野范围",
+		Min = 1,
+		Max = 120,
+		Default = Workspace.CurrentCamera.FieldOfView,
+		AllowRightClickInput = true,
+	}
 )
-SelfBox:AddSlider("Fov", { Text = "视野范围", Min = 1, Max = 120, Default = 70, AllowRightClickInput = true })
+SelfBox:AddDivider()
+SelfBox:AddSlider(
+	"MinZoom",
+	{ Text = "最小缩放", Default = LocalPlayer.CameraMinZoomDistance, AllowRightClickInput = true }
+)
+SelfBox:AddSlider(
+	"MaxZoom",
+	{ Text = "最大缩放", Default = LocalPlayer.CameraMaxZoomDistance, AllowRightClickInput = true }
+)
 
 -- UI设置
 local Menu = Tabs["UI Settings"]:AddRightGroupbox("菜单选项", "wrench")
@@ -486,7 +518,7 @@ Menu:AddToggle("KeybindMenu", {
 })
 Menu:AddToggle("KeepHub", { Text = "在传送中执行" })
 local TeleportCheck = false
-Players.LocalPlayer.OnTeleport:Connect(function(state)
+LocalPlayer.OnTeleport:Connect(function(state)
 	if Toggles.KeepHub.Value and not TeleportCheck then
 		TeleportCheck = true
 		queue_on_teleport(
@@ -535,7 +567,7 @@ Toggles.PlayerESP:OnChanged(function(state)
 	else
 		playerAdded:Disconnect()
 		for _, plr in Players:GetPlayers() do
-			if plr == Players.LocalPlayer then
+			if plr == LocalPlayer then
 				continue
 			end
 			ESPLibrary:RemoveESP(plr.Character)
@@ -546,7 +578,7 @@ end)
 Options.PlayerESPColorPicker:OnChanged(function(color)
 	if Toggles.PlayerESP.Value and not Toggles.EnableTeamColor.Value then
 		for _, plr in Players:GetPlayers() do
-			if plr == Players.LocalPlayer then
+			if plr == LocalPlayer then
 				continue
 			end
 
@@ -568,7 +600,7 @@ Toggles.EnableTeamColor:OnChanged(function(state)
 	end
 
 	for _, plr in Players:GetPlayers() do
-		if plr == Players.LocalPlayer then
+		if plr == LocalPlayer then
 			continue
 		end
 
@@ -657,20 +689,20 @@ end)
 
 Toggles.EnableSpeedControl:OnChanged(function(state)
 	if state then
-		Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = Options.SpeedControl.Value
+		LocalPlayer.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = Options.SpeedControl.Value
 	else
-		Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = 16
+		LocalPlayer.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = 16
 	end
 end)
 
 Options.SpeedControl:OnChanged(function(value)
 	if Toggles.EnableSpeedControl.Value then
-		Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = value
+		LocalPlayer.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = value
 	end
 end)
 
 Toggles.EnableJumpPower:OnChanged(function(state)
-	local plr = Players.LocalPlayer
+	local plr = LocalPlayer
 	local jpower = if state then Options.JumpPower.Value else 50
 	if plr.Character:FindFirstChildOfClass("Humanoid").UseJumpPower then
 		plr.Character:FindFirstChildOfClass("Humanoid").JumpPower = jpower
@@ -681,7 +713,7 @@ end)
 
 Options.JumpPower:OnChanged(function(value)
 	if Toggles.EnableJumpPower.Value then
-		local plr = Players.LocalPlayer
+		local plr = LocalPlayer
 		if plr.Character:FindFirstChildOfClass("Humanoid").UseJumpPower then
 			plr.Character:FindFirstChildOfClass("Humanoid").JumpPower = value
 		else
@@ -702,14 +734,11 @@ local NoclipParts = {}
 local Noclipping = nil
 Toggles.EnableNoclip:OnChanged(function(state)
 	if state then
-		pcall(function()
-			Noclipping:Disconnect()
-		end)
 		task.wait(0.1)
 		NoclipParts = {}
 		Noclipping = RunService.Stepped:Connect(function()
-			if Players.LocalPlayer.Character ~= nil then
-				for _, child in pairs(Players.LocalPlayer.Character:GetDescendants()) do
+			if LocalPlayer.Character ~= nil then
+				for _, child in pairs(LocalPlayer.Character:GetDescendants()) do
 					if child:IsA("BasePart") and child.CanCollide == true then
 						child.CanCollide = false
 						NoclipParts[child] = true
@@ -718,9 +747,7 @@ Toggles.EnableNoclip:OnChanged(function(state)
 			end
 		end)
 	else
-		pcall(function()
-			Noclipping:Disconnect()
-		end)
+    Noclipping:Disconnect()
 		task.wait(0.1)
 		for child, _ in pairs(NoclipParts) do
 			if typeof(child) == "Instance" and child:IsA("BasePart") and child.Parent then
@@ -809,14 +836,47 @@ end)
 
 Toggles.CameraMode:OnChanged(function(state)
 	if state then
-		Players.LocalPlayer.CameraMode = Enum.CameraMode.Classic
+		LocalPlayer.CameraMode = Enum.CameraMode.Classic
+		local camMax = LocalPlayer.CameraMaxZoomDistance
+		local camMin = LocalPlayer.CameraMinZoomDistance
+		if camMax < 10 then
+			camMax = 10
+		end
+		LocalPlayer.CameraMaxZoomDistance = 10
+		LocalPlayer.CameraMinZoomDistance = 10
+		task.wait()
+		LocalPlayer.CameraMaxZoomDistance = camMax
+		LocalPlayer.CameraMinZoomDistance = camMin
 	else
-		Players.LocalPlayer.CameraMode = Enum.CameraMode.LockFirstPerson
+		LocalPlayer.CameraMode = Enum.CameraMode.LockFirstPerson
 	end
 end)
 
+Library:GiveSignal(Workspace.CurrentCamera:GetPropertyChangedSignal("FieldOfView"):Connect(function()
+	Options.Fov:SetValue(Workspace.CurrentCamera.FieldOfView)
+end))
 Options.Fov:OnChanged(function(value)
-	Workspace.CurrentCamera.FieldOfView = value
+	if value ~= Workspace.CurrentCamera.FieldOfView then
+		Workspace.CurrentCamera.FieldOfView = value
+	end
+end)
+
+Library:GiveSignal(LocalPlayer:GetPropertyChangedSignal("CameraMinZoomDistance"):Connect(function()
+	Options.MinZoom:SetValue(LocalPlayer.CameraMinZoomDistance)
+end))
+Options.MinZoom:OnChanged(function(value)
+	if value ~= LocalPlayer.CameraMinZoomDistance then
+		LocalPlayer.CameraMinZoomDistance = value
+	end
+end)
+
+Library:GiveSignal(LocalPlayer:GetPropertyChangedSignal("CameraMaxZoomDistance"):Connect(function()
+	Options.MaxZoom:SetValue(LocalPlayer.CameraMaxZoomDistance)
+end))
+Options.MaxZoom:OnChanged(function(value)
+	if value ~= LocalPlayer.CameraMaxZoomDistance then
+		LocalPlayer.CameraMaxZoomDistance = value
+	end
 end)
 
 local objAdded
@@ -867,7 +927,7 @@ local scpchrAdded
 Toggles.AutoClothes:OnChanged(function(state)
 	if state then
 		fireclickdetector(Workspace.Facility.Special["Clothes Giver"].ClickPart.ClickDetector)
-		scpchrAdded = Players.LocalPlayer.CharacterAdded:Connect(function()
+		scpchrAdded = LocalPlayer.CharacterAdded:Connect(function()
 			fireclickdetector(Workspace.Facility.Special["Clothes Giver"].ClickPart.ClickDetector)
 		end)
 	else
@@ -892,7 +952,7 @@ ThemeManager:LoadDefault()
 
 Loading:SetCurrentStep(2)
 Loading:ShowSidebarPage(true)
-Loading.Sidebar:AddLabel("用户: " .. Players.LocalPlayer.Name)
+Loading.Sidebar:AddLabel("用户: " .. LocalPlayer.Name)
 Loading.Sidebar:AddLabel("当前版本: " .. version)
 Loading:SetDescription("加载完成!")
 task.wait(1)
