@@ -271,24 +271,26 @@ local Tabs = {
 -- 获取公告
 local result = request({ Url = repo .. "update.json" })
 if result.Success then
-  local UpdateInfo = HttpService:JSONDecode(result.Body)
-  if UpdateInfo.Version ~= version then
-    Library:Notify("当前版本过旧,请尽快更新!")
-  end
-  if UpdateInfo.Announcement ~= "" then
+	local UpdateInfo = HttpService:JSONDecode(result.Body)
+	if UpdateInfo.Version ~= version then
+		Library:Notify("当前版本过旧,请尽快更新!\n最新版本: " .. UpdateInfo.Version)
+	end
+	if UpdateInfo.Announcement ~= "" then
     Tabs.Main:UpdateWarningBox({
-        Title = "公告",
-        Text = UpdateInfo.Announcement,
-        IsNormal = true
+      Title = "公告",
+      Text = UpdateInfo.Announcement,
+      IsNormal = true,
+      Visible = true,
     })
-  end
+	end
 else
-  Tabs.Main:UpdateWarningBox({
-      Title = "警告",
-      Text = "无法获取版本信息:(",
-      IsNormal = false
-  })
-  warn(string.format("[%s %s] 无法获取版本信息", tostring(result.StatusCode), result.StatusMessage))
+	Tabs.Main:UpdateWarningBox({
+		Title = "警告",
+		Text = "无法获取版本信息:(",
+		IsNormal = false,
+    Visible = true,
+	})
+	warn(string.format("[%s %s] 无法获取版本信息", tostring(result.StatusCode), result.StatusMessage))
 end
 
 -- 主要
@@ -311,14 +313,19 @@ DownloadTab:AddInput("FileURL", { Text = "文件URL", Placeholder = "https://exa
 DownloadTab:AddButton({
 	Text = "下载",
 	Func = function()
+		if Options.FileURL.Value == "" then
+			return
+		end
 		local fileName = getFileNameFromURL(Options.FileURL.Value)
 		local processN = Library:Notify({
 			Title = fileName,
 			Description = "下载文件中...",
 			Persist = true,
 		})
-		local result = request({ Url = Options.FileURL.Value })
-		if result and result.Success then
+		local success, result = pcall(function()
+			request({ Url = Options.FileURL.Value })
+		end)
+		if success and result and result.Success then
 			Library:Notify("下载成功!")
 			writefile(fileName, result.Body)
 		else
@@ -601,7 +608,7 @@ function CustomESP(part)
 		return
 	end
 	local dtr = part.Destroying:Connect(function()
-    print(part)
+		print(part)
 		RemoveCustomESP(part)
 	end)
 	ESPLibrary:AddESP({
@@ -623,7 +630,7 @@ function CustomESP(part)
 end
 
 function RemoveCustomESP(part)
-  print(part)
+	print(part)
 	if not CustomESPs[part] then
 		return
 	end
