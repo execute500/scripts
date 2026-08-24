@@ -11,6 +11,7 @@ end
 local BASEURL = config.BaseUrl
 local APIKEY = config.APIKey
 local MODEL = config.Model
+local COOLDOWN = config.Cooldown or 10
 
 SYSTEM_PROMPT = [[You are a real player currently playing Roblox, and your player name is "%s". Please respond to other players' questions in the game chat in a natural, friendly manner as an ordinary player. Follow these guidelines:
 - Keep your responses **short and concise** – use brief sentences or even fragments, just like a typical player in a fast-paced game;
@@ -66,7 +67,7 @@ end
 
 local cooldown = tick()
 getgenv().aichat = TextChatService.MessageReceived:Connect(function(msg)
-  if tick() - cooldown > 10 then
+  if tick() - cooldown > COOLDOWN then
     cooldown = tick()
     handleMessage(msg)
   else
