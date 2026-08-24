@@ -303,44 +303,36 @@ MainTab:AddToggle("EnableFly", { Text = "飞行" })
 MainTab:AddToggle("EnableNoclip", { Text = "穿墙" })
 MainTab:AddToggle("instantproximityprompts", { Text = "瞬间交互" })
 
-local SessionTab = Tabs.Main:AddRightGroupbox("会话")
+local SessionTab = Tabs.Main:AddRightGroupbox("会话", "circle-ellipsis")
 SessionTab:AddButton({ Text = "重置角色", DoubleClick = true, Func = reset })
 SessionTab:AddButton({ Text = "重新加入", DoubleClick = true, Func = rejoin })
 
 local DownloadTab = Tabs.Main:AddRightGroupbox("下载", "download")
 DownloadTab:AddInput("FileURL", { Text = "文件URL", Placeholder = "https://example.com/file.txt" })
-DownloadTab:AddButton(
-	"下载",
-	function()
-		if Options.FileURL.Value == "" then
-			return
-		end
-		local fileName = getFileNameFromURL(Options.FileURL.Value)
-		local processN = Library:Notify({
-			Title = fileName,
-			Description = "下载文件中...",
-			Persist = true,
-		})
-		local success, result = pcall(function()
-			request({ Url = Options.FileURL.Value })
-		end)
-		if success and result and result.Success then
-			Library:Notify("下载成功!")
-			writefile(fileName, result.Body)
-		else
-			Library:Notify("下载失败!")
-			warn(
-				string.format(
-					"[%s %s] 文件 %s 下载失败",
-					tostring(result.StatusCode),
-					result.StatusMessage,
-					fileName
-				)
-			)
-		end
-		processN:Destroy()
+DownloadTab:AddButton("下载", function()
+	if Options.FileURL.Value == "" then
+		return
 	end
-)
+	local fileName = getFileNameFromURL(Options.FileURL.Value)
+	local processN = Library:Notify({
+		Title = fileName,
+		Description = "下载文件中...",
+		Persist = true,
+	})
+	local success, result = pcall(function()
+		request({ Url = Options.FileURL.Value })
+	end)
+	if success and result and result.Success then
+		Library:Notify("下载成功!")
+		writefile(fileName, result.Body)
+	else
+		Library:Notify("下载失败!")
+		warn(
+			string.format("[%s %s] 文件 %s 下载失败", tostring(result.StatusCode), result.StatusMessage, fileName)
+		)
+	end
+	processN:Destroy()
+end)
 
 local OtherScripts = Tabs.Main:AddRightGroupbox("其他脚本", "ellipsis")
 local Scripts = {
@@ -475,29 +467,26 @@ SelfBox:AddButton("摄像机穿墙", function()
 	local gc = (debug and debug.getconstants) or getconstants
 	local pop = LocalPlayer.PlayerScripts.PlayerModule.CameraModule.ZoomController.Popper
 	for _, v in pairs(getgc()) do
-		if type(v) == 'function' and getfenv(v).script == pop then
+		if type(v) == "function" and getfenv(v).script == pop then
 			for i, v1 in pairs(gc(v)) do
-				if tonumber(v1) == .25 then
+				if tonumber(v1) == 0.25 then
 					sc(v, i, 0)
 				elseif tonumber(v1) == 0 then
-					sc(v, i, .25)
+					sc(v, i, 0.25)
 				end
 			end
 		end
 	end
-  Library:Notify("设置成功!", 2)
+	Library:Notify("设置成功!", 2)
 end)
 SelfBox:AddDivider()
-SelfBox:AddSlider(
-	"Fov",
-	{
-		Text = "视野范围",
-		Min = 1,
-		Max = 120,
-		Default = Workspace.CurrentCamera.FieldOfView,
-		AllowRightClickInput = true,
-	}
-)
+SelfBox:AddSlider("Fov", {
+	Text = "视野范围",
+	Min = 1,
+	Max = 120,
+	Default = Workspace.CurrentCamera.FieldOfView,
+	AllowRightClickInput = true,
+})
 SelfBox:AddDivider()
 SelfBox:AddSlider(
 	"MinZoom",
@@ -747,7 +736,7 @@ Toggles.EnableNoclip:OnChanged(function(state)
 			end
 		end)
 	else
-    Noclipping:Disconnect()
+		Noclipping:Disconnect()
 		task.wait(0.1)
 		for child, _ in pairs(NoclipParts) do
 			if typeof(child) == "Instance" and child:IsA("BasePart") and child.Parent then
