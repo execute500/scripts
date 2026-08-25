@@ -31,6 +31,18 @@ local histroy = {
   }
 }
 
+local function addHistroy(role, content)
+  table.insert(histroy, {
+    role = role,
+    content = content
+  })
+  print(string.format("[%s] %s", role, histroy[#histroy].content))
+end
+
+local function addMessage(msg)
+  addHistroy("user", string.format("[%s] %s", msg.TextSource, msg.Text))
+end
+
 local function chatMessage(str)
   TextChatService.TextChannels.RBXGeneral:SendAsync(tostring(str))
 end
@@ -51,27 +63,23 @@ local function handleMessage(msg)
   if result.Success then
     result = HttpService:JSONDecode(result.Body)
     local reply = result.choices[1].message.content
-    table.insert(histroy, {
-      role = "assistant",
-      content = reply
-    })
-    print("[AI] " .. reply)
+    addHistroy("assistant", reply)
     chatMessage(reply)
   else
     error(string.format("[%s %s] 请求AI错误!", tostring(result.StatusCode), result.StatusMessage))
   end
 end
 
-local cooldown = tick()
+local cooldown = tick() - COOLDOWN
 getgenv().aichat = TextChatService.MessageReceived:Connect(function(msg)
-  if Players:GetPlayerByUserId(msg.TextSource.UserId) == Players.LocalPlayer then
+  if msg.Status ~= Enum.TextChatMessageStatus.Success then
+    addHistroy("system", string.format("Failed to receive \"%s\"'s message, reason: %s", msg.TextSource, msg.Status.Name))
     return
   end
-  table.insert(histroy, {
-    role = "user",
-    content = string.format("[%s] %s", Players:GetPlayerByUserId(msg.TextSource.UserId).Name, msg.Text)
-  })
-  print(histroy[#histroy].content)
+  if msg.TextSource.UserId == Players.LocalPlayer.UserId then
+    return
+  end
+  addMessage(msg)
   if tick() - cooldown > COOLDOWN then
     cooldown = tick()
     handleMessage(msg)
