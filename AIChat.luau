@@ -14,6 +14,7 @@ local BASEURL = config.BaseUrl
 local APIKEY = config.APIKey
 local MODEL = config.Model
 local COOLDOWN = config.Cooldown or 10
+local ONLY_FRIEND = config.OnlyFriend or false
 
 SYSTEM_PROMPT = [[You are a real player currently playing Roblox, and your player name is "%s". Please respond to other players' questions in the game chat in a natural, friendly manner as an ordinary player. Follow these guidelines:
 - Keep your responses **short and concise** – use brief sentences or even fragments, just like a typical player in a fast-paced game;
@@ -74,11 +75,17 @@ end
 
 local cooldown = tick() - COOLDOWN
 function msgEvent(msg)
-  if msg.Status ~= Enum.TextChatMessageStatus.Success then
-    addHistroy("system", string.format("Failed to receive \"%s\"'s message, reason: %s", Players:GetPlayerByUserId(msg.TextSource.UserId).Name, msg.Status.Name))
+  if msg.TextSource.UserId == Players.LocalPlayer.UserId then
+    if msg.Status ~= Enum.TextChatMessageStatus.Success then
+      addHistroy("system", "Your message failed to send, reason: " .. msg.Status.Name)
+    end
     return
   end
-  if msg.TextSource.UserId == Players.LocalPlayer.UserId then
+  if ONLY_FRIEND and not Players.LocalPlayer:IsFriendsWithAsync(msg.TextSource.UserId) then
+    return
+  end
+  if msg.Status ~= Enum.TextChatMessageStatus.Success then
+    addHistroy("system", string.format("Failed to receive \"%s\"'s message, reason: %s", Players:GetPlayerByUserId(msg.TextSource.UserId).Name, msg.Status.Name))
     return
   end
   addMessage(msg)
