@@ -40,7 +40,7 @@ local function addHistroy(role, content)
 end
 
 local function addMessage(msg)
-  addHistroy("user", string.format("[%s] %s", msg.TextSource, msg.Text))
+  addHistroy("user", string.format("[%s] %s", tostring(msg.TextSource), msg.Text))
 end
 
 local function chatMessage(str)
@@ -73,7 +73,7 @@ end
 local cooldown = tick() - COOLDOWN
 getgenv().aichat = TextChatService.MessageReceived:Connect(function(msg)
   if msg.Status ~= Enum.TextChatMessageStatus.Success then
-    addHistroy("system", string.format("Failed to receive \"%s\"'s message, reason: %s", msg.TextSource, msg.Status.Name))
+    addHistroy("system", string.format("Failed to receive \"%s\"'s message, reason: %s", tostring(msg.TextSource), msg.Status.Name))
     return
   end
   if msg.TextSource.UserId == Players.LocalPlayer.UserId then
