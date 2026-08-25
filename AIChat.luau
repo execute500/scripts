@@ -64,6 +64,9 @@ end
 
 local cooldown = tick()
 getgenv().aichat = TextChatService.MessageReceived:Connect(function(msg)
+  if Players:GetPlayerByUserId(msg.TextSource.UserId) == Players.LocalPlayer then
+    return
+  end
   table.insert(histroy, {
     role = "user",
     content = string.format("[%s] %s", Players:GetPlayerByUserId(msg.TextSource.UserId).Name, msg.Text)
