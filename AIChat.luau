@@ -4,7 +4,7 @@ local TextChatService = game:GetService("TextChatService")
 local HttpService = game:GetService("HttpService")
 
 local config = getgenv().AIConfig
-if not (config and config.BaseUrl and config.APIkey and config.Model) then
+if not (config and config.BaseUrl and config.APIKey and config.Model) then
   error("AI配置错误!")
 end
 
