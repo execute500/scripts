@@ -36,10 +36,6 @@ local function chatMessage(str)
 end
 
 local function handleMessage(msg)
-  table.insert(histroy, {
-    role = "user",
-    content = string.format("[%s] %s", Players:GetPlayerByUserId(msg.TextSource.UserId).Name, msg.Text)
-  })
   local result = HttpService:RequestAsync({
     Url = BASEURL .. "/chat/completions",
     Method = "POST",
@@ -59,6 +55,7 @@ local function handleMessage(msg)
       role = "assistant",
       content = reply
     })
+    print("[AI] " .. reply)
     chatMessage(reply)
   else
     error(string.format("[%s %s] 请求AI错误!", tostring(result.StatusCode), result.StatusMessage))
@@ -67,13 +64,13 @@ end
 
 local cooldown = tick()
 getgenv().aichat = TextChatService.MessageReceived:Connect(function(msg)
+  table.insert(histroy, {
+    role = "user",
+    content = string.format("[%s] %s", Players:GetPlayerByUserId(msg.TextSource.UserId).Name, msg.Text)
+  })
+  print(histroy[#histroy].content)
   if tick() - cooldown > COOLDOWN then
     cooldown = tick()
     handleMessage(msg)
-  else
-    table.insert(histroy, {
-      role = "user",
-      content = string.format("[%s] %s", Players:GetPlayerByUserId(msg.TextSource.UserId).Name, msg.Text)
-    })
   end
 end)
