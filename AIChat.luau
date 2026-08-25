@@ -1,4 +1,6 @@
 local Players = game:GetService("Players")
+local StarterGui = game:GetService("StarterGui")
+local UserInputService = game:GetService("UserInputService")
 local MarketplaceService = game:GetService("MarketplaceService")
 local TextChatService = game:GetService("TextChatService")
 local HttpService = game:GetService("HttpService")
@@ -71,7 +73,7 @@ local function handleMessage(msg)
 end
 
 local cooldown = tick() - COOLDOWN
-getgenv().aichat = TextChatService.MessageReceived:Connect(function(msg)
+function msgEvent(msg)
   if msg.Status ~= Enum.TextChatMessageStatus.Success then
     addHistroy("system", string.format("Failed to receive \"%s\"'s message, reason: %s", Players:GetPlayerByUserId(msg.TextSource.UserId).Name, msg.Status.Name))
     return
@@ -83,5 +85,29 @@ getgenv().aichat = TextChatService.MessageReceived:Connect(function(msg)
   if tick() - cooldown > COOLDOWN then
     cooldown = tick()
     handleMessage(msg)
+  end
+end
+
+local aichat = TextChatService.MessageReceived:Connect(msgEvent)
+UserInputService.InputBegan:Connect(function(input, process)
+  if process then
+    return
+  end
+
+  if input.KeyCode == Enum.KeyCode.C then
+    if aichat then
+      StarterGui:SetCore("SendNotification", {
+        Title = "AIChat",
+        Text = "AIChat 已关闭!"
+      })
+      aichat:Disconnect()
+      aichat = nil
+    else
+      StarterGui:SetCore("SendNotification", {
+        Title = "AIChat",
+        Text = "AIChat 已开启!"
+      })
+      aichat = TextChatService.MessageReceived:Connect(msgEvent)
+    end
   end
 end)
