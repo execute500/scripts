@@ -38,7 +38,7 @@ end
 local function handleMessage(msg)
   table.insert(histroy, {
     role = "user",
-    content = string.format("[%s] ", Players:GetPlayerByUserId(msg.TextSource.UserId)) .. msg.Text
+    content = string.format("[%s] %s", Players:GetPlayerByUserId(msg.TextSource.UserId).Name, msg.Text)
   })
   local result = HttpService:RequestAsync({
     Url = BASEURL .. "/chat/completions",
@@ -73,7 +73,7 @@ getgenv().aichat = TextChatService.MessageReceived:Connect(function(msg)
   else
     table.insert(histroy, {
       role = "user",
-      content = string.format("[%s] %s", Players:GetPlayerByUserId(msg.TextSource.UserId), msg.Text)
+      content = string.format("[%s] %s", Players:GetPlayerByUserId(msg.TextSource.UserId).Name, msg.Text)
     })
   end
 end)
