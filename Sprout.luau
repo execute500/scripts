@@ -14,7 +14,7 @@ Services = setmetatable({}, {
 	end,
 })
 
-local version = "0.1.4"
+local version = "0.1.5"
 local repo = "https://raw.githubusercontent.com/execute500/scripts/refs/heads/main/"
 local librepo = "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/"
 local Library = loadstring(game:HttpGet(librepo .. "Library.lua"))()
@@ -810,16 +810,25 @@ Options.Brightness:OnChanged(function(value)
 	end
 end)
 
+local fogData = {}
 Toggles.Nofog:OnChanged(function(state)
 	if state then
+    fogData = {
+      FogEnd = Lighting.FogEnd,
+      Fogs = {}
+    }
 		Lighting.FogEnd = 100000
 		for i, v in pairs(Lighting:GetDescendants()) do
 			if v:IsA("Atmosphere") then
-				v:Destroy()
+        fogData.Fogs[v] = v.Parent
+        v.Parent = nil
 			end
 		end
 	else
-		Library:Notify("温馨提示: 无法关闭:)")
+    Lighting.FogEnd = fogData.FogEnd
+    for v, p in pairs(fogData.Fogs) do
+      v.Parent = p
+    end
 	end
 end)
 
