@@ -340,6 +340,7 @@ local Scripts = {
 	["甩飞"] = "https://raw.githubusercontent.com/alinurb295-coder/ALINUR-FLING-SCRIPT/refs/heads/main/ALINUR-FLING.lua",
 	["Dex++"] = "https://github.com/AZYsGithub/DexPlusPlus/releases/latest/download/out.lua",
 	["飞行GUI"] = repo .. "/飞行GUI.luau",
+  ["网易云音乐"] = "https://gist.githubusercontent.com/meisdad321-cloud/dda158cf8ec9d771c7764bd08e8d19cb/raw/NeteaseCloudMusicForRoblox.lua"
 }
 for name, url in pairs(Scripts) do
 	OtherScripts:AddButton({
