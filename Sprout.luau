@@ -14,7 +14,7 @@ Services = setmetatable({}, {
 	end,
 })
 
-local version = "0.1.5"
+local version = "0.1.6"
 local repo = "https://raw.githubusercontent.com/execute500/scripts/refs/heads/main/"
 local librepo = "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/"
 local Library = loadstring(game:HttpGet(librepo .. "Library.lua"))()
@@ -662,6 +662,15 @@ function RemoveCustomESP(part)
 	Options.CustomESPs:SetValues(CustomESPs)
 end
 
+function jumpPower(power)
+  local plr = LocalPlayer
+  if plr.Character:FindFirstChildOfClass("Humanoid").UseJumpPower then
+    plr.Character:FindFirstChildOfClass("Humanoid").JumpPower = power
+  else
+    plr.Character:FindFirstChildOfClass("Humanoid").JumpHeight = power
+  end
+end
+
 Options.CustomESPColorPicker:OnChanged(function(color)
 	for i, part in pairs(Options.CustomESPs:GetActiveValues()) do
 		CustomESPs[part]["Color"] = color
@@ -677,10 +686,14 @@ Options.CustomESPs:OnChanged(function()
 	end
 end)
 
+local speedStepped
 Toggles.EnableSpeedControl:OnChanged(function(state)
 	if state then
-		LocalPlayer.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = Options.SpeedControl.Value
+    speedStepped = RunService.PreSimulation:Connect(function()
+      LocalPlayer.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = Options.SpeedControl.Value
+    end)
 	else
+    speedStepped:Disconnect()
 		LocalPlayer.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = 16
 	end
 end)
@@ -691,25 +704,17 @@ Options.SpeedControl:OnChanged(function(value)
 	end
 end)
 
+local jumpStepped
 Toggles.EnableJumpPower:OnChanged(function(state)
-	local plr = LocalPlayer
-	local jpower = if state then Options.JumpPower.Value else 50
-	if plr.Character:FindFirstChildOfClass("Humanoid").UseJumpPower then
-		plr.Character:FindFirstChildOfClass("Humanoid").JumpPower = jpower
-	else
-		plr.Character:FindFirstChildOfClass("Humanoid").JumpHeight = jpower
-	end
-end)
-
-Options.JumpPower:OnChanged(function(value)
-	if Toggles.EnableJumpPower.Value then
-		local plr = LocalPlayer
-		if plr.Character:FindFirstChildOfClass("Humanoid").UseJumpPower then
-			plr.Character:FindFirstChildOfClass("Humanoid").JumpPower = value
-		else
-			plr.Character:FindFirstChildOfClass("Humanoid").JumpHeight = value
-		end
-	end
+  if state then
+    jumpStepped = RunService.PreSimulation:Connect(function()
+      jumpPower(Options.JumpPower.Value)
+    end)
+  else
+    jumpStepped:Disconnect()
+    task.wait()
+    jumpPower(50)
+  end
 end)
 
 Toggles.EnableFly:OnChanged(function(state)
